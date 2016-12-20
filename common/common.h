@@ -12,4 +12,9 @@ typedef struct _bdshareInfoType {
 	char fid[100];//fid
 	char url[500];//百度视频分享地址(非目录页面)
 } bdshareInfoType;
+/** 文件数组结构,用于比较获取最大的视频文件的地址 */
+typedef struct _videoCompare {
+    int key;//下标
+    int size;//文件大小
+} videoCompare;
 #endif
