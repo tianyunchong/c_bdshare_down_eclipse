@@ -10,6 +10,7 @@ typedef struct _bdshareInfoType {
 	char shareid[100];//百度shareid
 	char uk[100];//百度分享uk
 	char fid[100];//fid
+	char title[100];//分享的文件名称
 	char url[500];//百度视频分享地址(非目录页面)
 } bdshareInfoType;
 /** 文件数组结构,用于比较获取最大的视频文件的地址 */

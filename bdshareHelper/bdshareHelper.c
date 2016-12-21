@@ -44,6 +44,7 @@ void getCurSharePath(char *url, char * curSharePath) {
  * 请求分享目录api接口，提取最终的的分享页面网址
  */
 void getVideoFromDirApi(char * childDirApi, bdshareInfoType * bdshareInfo) {
+	printf("%s\n", childDirApi);
 	struct curl_slist *headers = NULL;
 	char *jsonStr = curlHtml(childDirApi, headers);
 	getVideoFromDirApiJson(jsonStr, bdshareInfo);
@@ -56,8 +57,19 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 		return;
 	}
 	cJSON *root = cJSON_Parse(jsonStr);
+	if (root == NULL) {
+		/** 问题原因，获取的json字符串中存在换行，多余的空格的问题 */
+		printf("%s\n", "无法提取到json根数据");
+		printf("%s\n", jsonStr);
+		printf("json字符串长度：%ld\n", strlen(jsonStr));
+		return;
+	} else {
+		printf("%s\n", jsonStr);
+		printf("json字符串长度：%ld\n", strlen(jsonStr));
+	}
 	int errno = cJSON_GetObjectItem(root, "errno")->valueint;
 	if (errno != 0) {
+		printf("%s\n", "无法获取到正确的json数据");
 		return;
 	}
 	/** 获取下list节点 */
@@ -67,7 +79,7 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 	}
 	/** 遍历下list节点 */
 	cJSON *child = cJSON_GetObjectItem(list, 0);
-	int key, compareKey;
+	int key = 0, compareKey = 0;
 	int minSize = 0;
 	while (child) {
 		/** 判断下是否是目录 */
@@ -99,10 +111,19 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 		return;
 	}
 	/** 获取符合条件的节点 */
-	child = cJSON_DetachItemFromArray(list, compareKey);
+	printf("key值:%d\n", compareKey);
+	child = cJSON_GetArrayItem(list, compareKey);
+	if (child == NULL) {
+		printf("%s\n", "未获取到对应的节点");
+		return;
+	}
 	char *filename =
 					cJSON_GetObjectItem(child, "server_filename")->valuestring;
-	printf("最终符合条件的文件名是%s\n", filename);
+	//double fs_fid = cJSON_GetObjectItem(child, "fs_id")->valuedouble;
+	//printf("%f\n", fs_fid);
+	/** 将页面数据存入bdshareInfo */
+	strcpy(bdshareInfo->title, filename);
+	printf("%s\n", filename);
 }
 /**
  * 根据文件名称判断是否是文件名
