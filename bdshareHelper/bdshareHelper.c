@@ -2,6 +2,7 @@
 #include "../common/common.h"
 #include "../urlHelper/urlHelper.h"
 #include "../curlHelper/curlHelper.h"
+#include "../stringHelper/stringHelper.h"
 #include "cjson/cJSON.h"
 #include <stdio.h>
 #include <string.h>
@@ -119,11 +120,10 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 	}
 	char *filename =
 					cJSON_GetObjectItem(child, "server_filename")->valuestring;
-	//double fs_fid = cJSON_GetObjectItem(child, "fs_id")->valuedouble;
-	//printf("%f\n", fs_fid);
+	double fs_fid = cJSON_GetObjectItem(child, "fs_id")->valuedouble;
+	convertDoubleToString(fs_fid, bdshareInfo->fid);
 	/** 将页面数据存入bdshareInfo */
 	strcpy(bdshareInfo->title, filename);
-	printf("%s\n", filename);
 }
 /**
  * 根据文件名称判断是否是文件名
