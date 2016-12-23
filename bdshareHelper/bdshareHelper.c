@@ -36,7 +36,8 @@ void getCurSharePath(char *url, char * curSharePath) {
 	if (len) {
 		memcpy(curSharePath, html + pmatch[1].rm_so, len);
 		/** 去除下右斜杠 */
-		char * newPath = str_replace("\\", "", curSharePath);
+		char newPath[200];
+		str_replace("\\", "", curSharePath, newPath);
 		strcpy(curSharePath, newPath);
 	}
 	return;
@@ -57,20 +58,20 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 	if (jsonStr == NULL) {
 		return;
 	}
+	/** 处理可能多余的换行避免影响json的解析 */
+	str_replace("\r\n", "", jsonStr, jsonStr);
+	//str_replace("\n", "", jsonStr, jsonStr);
+	//str_replace("\r", "", jsonStr, jsonStr);
 	cJSON *root = cJSON_Parse(jsonStr);
 	if (root == NULL) {
 		/** 问题原因，获取的json字符串中存在换行，多余的空格的问题 */
+		printf("%s\n", jsonStr);
 		printf("%s\n", "无法提取到json根数据");
-		printf("%s\n", jsonStr);
-		printf("json字符串长度：%ld\n", strlen(jsonStr));
 		return;
-	} else {
-		printf("%s\n", jsonStr);
-		printf("json字符串长度：%ld\n", strlen(jsonStr));
 	}
 	int errno = cJSON_GetObjectItem(root, "errno")->valueint;
 	if (errno != 0) {
-		printf("%s\n", "无法获取到正确的json数据");
+		printf("%s\n", "errno等于0,该目录下没有内容");
 		return;
 	}
 	/** 获取下list节点 */
@@ -112,7 +113,6 @@ void getVideoFromDirApiJson(char *jsonStr, bdshareInfoType * bdshareInfo) {
 		return;
 	}
 	/** 获取符合条件的节点 */
-	printf("key值:%d\n", compareKey);
 	child = cJSON_GetArrayItem(list, compareKey);
 	if (child == NULL) {
 		printf("%s\n", "未获取到对应的节点");
@@ -143,17 +143,20 @@ int isVideoByFileName(char * filename) {
 /**
  * 提取下video视频信息
  */
-void getVideoFromBdshare(char *url, videoInfoType *videoArr) {
+bdshareInfoType getVideoFromBdshare(char *url) {
 	bdshareInfoType bdshareInfo;
 	/** 从url提取需要的百度分享参数 */
 	getParamsFromBdshareUrl(url, &bdshareInfo);
 	/** 判断是否提取到了fid, 没有则是百度分享目录链接 */
 	if (bdshareInfo.fid[0] != '\0') {
-		return;
+		sprintf(bdshareInfo.url, "https://pan.baidu.com/share/link?shareid=%s&uk=%s&fid=%s", bdshareInfo.shareid, bdshareInfo.uk,
+				bdshareInfo.fid);
+		return bdshareInfo;
 	}
 	/** 获取当前分享目录path */
-	char curSharePath[100];
+	char curSharePath[100] = {0};
 	char curSharePathUrlEncode[100];
+	printf("%s\n", url);
 	getCurSharePath(url, curSharePath);
 	URLEncode(curSharePath, strlen(curSharePath), curSharePathUrlEncode, 100);
 	/** 获取子目录的api接口地址 */
@@ -163,4 +166,12 @@ void getVideoFromBdshare(char *url, videoInfoType *videoArr) {
 			bdshareInfo.uk, bdshareInfo.shareid, curSharePathUrlEncode);
 	/** 从api接口中提取分享页面url */
 	getVideoFromDirApi(childDirApi, &bdshareInfo);
+	if (bdshareInfo.fid[0] != '\0') {
+		sprintf(bdshareInfo.url, "https://pan.baidu.com/share/link?shareid=%s&uk=%s&fid=%s", bdshareInfo.shareid, bdshareInfo.uk,
+							bdshareInfo.fid);
+		return bdshareInfo;
+	}
+	printf("最终无法从链接%s获取到符合条件的视频文件分享地址\n", url);
+	memset(bdshareInfo.url, '\0', strlen(bdshareInfo.url));
+	return bdshareInfo;
 }

@@ -7,7 +7,7 @@ void substr(char *url, char *from, char*to, char *res) ;
 /** 字符串分割函数*/
 void splitString(char * string, char * sep, char result[][100]);
 /** 字符串替换函数 */
-char *str_replace(const char *search, const char *replace, char *string);
+void str_replace(const char *search, const char *replace, char *string, char * res);
 /** urlencode加密函数 */
 int URLEncode(const char* str, const int strSize, char* result,const int resultSize);
 #endif

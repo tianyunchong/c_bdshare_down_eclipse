@@ -4,7 +4,7 @@
 /** 从百度分享的链接中提取需要的参数*/
 void getParamsFromBdshareUrl(char *url, bdshareInfoType *bdshareInfo);
 /** 提取下video视频信息 */
-void getVideoFromBdshare(char *url, videoInfoType *videoArr);
+bdshareInfoType getVideoFromBdshare(char *url);
 /** 请求分享目录api接口，提取最终的的分享页面网址*/
 void getVideoFromDirApi(char * childDirApi, bdshareInfoType * bdshareInfo);
 /** 从获取的json中提取正确的那个视频地址 */

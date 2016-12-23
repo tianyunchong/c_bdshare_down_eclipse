@@ -22,6 +22,8 @@ void getParamFromUrl(char *url, char *key, char * res) {
 		}
 		i++;
 	}
+	/** 如果无法获取，默认设置为空 */
+	memset(res, '\0', strlen(res));
 	return;
 }
 /**
@@ -61,22 +63,21 @@ void splitString(char * string, char * sep, char result[][100]) {
 /**
  * 字符串替换函数
  */
-char *str_replace(const char *search, const char *replace, char *string) {
-	char *stringbak = (char *) malloc(strlen(string) + 1);
-	char *res = (char *) malloc(sizeof(char) * 1000 + strlen(string));
+void str_replace(const char *search, const char *replace, char *string, char * res) {
+	char * tmp = (char *)malloc(sizeof(char) * (strlen(string) + 100));
+	memset(tmp, '\0', strlen(tmp));
 	char *p;
-	memset(res, '\0', strlen(res));
-	strcpy(stringbak, string);
-	while ((p = strstr(stringbak, search)) != NULL) {
+	while ((p = strstr(string, search)) != NULL) {
 		/** 开始将检索到的内容之前的copy到res*/
-		strncat(res, stringbak, (p - stringbak));
-		strncat(res, replace, strlen(replace));
+		strncat(tmp, string, (p - string));
+		strncat(tmp, replace, strlen(replace));
 		/** 移动下stringbak的指针 */
-		stringbak = p + strlen(search);
+		string = p + strlen(search);
 	}
 	/** 最后将stringbak最后一截连接到res */
-	strncat(res, stringbak, strlen(stringbak));
-	return res;
+	strncat(tmp, string, strlen(string));
+	memset(res, '\0', strlen(res));
+	strcpy(res, tmp);
 }
 
 /**
