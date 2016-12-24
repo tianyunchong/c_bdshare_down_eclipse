@@ -12,11 +12,9 @@
  * 从单个的百度视频分享页面获取参数并组合成最终想要的下载请求链接
  */
 void getDownloadUrlByBdsharePage(char *url, char * downApiUrl) {
-	struct curl_slist *headers = NULL;
-	char * html = curlHtml(url, headers);
 	/** 从html中提取yunData的json数据字符串 */
-	char jsonStr[2000];
-	pregYunDataJson(html, jsonStr);
+	char jsonStr[5000];
+	pregYunDataJson(url, jsonStr);
 	str_replace("\r\n", "", jsonStr, jsonStr);
 	/** 从json中提取元素组合下载接口 */
 	getDownloadUrlFromYunDataJson(jsonStr, downApiUrl);
@@ -44,13 +42,14 @@ void getDownloadUrlFromYunDataJson(char * jsonStr, char * downApiUrl) {
 	time(&rawtime);
 	sprintf(downApiUrl,  "https://pan.baidu.com/api/sharedownload?sign=%s&timestamp=%ld&bdstoken=null&channel=chunlei&clienttype=0&web=1&app_id=%s",
 			sign, rawtime, app_id);
-	printf("%s\n", downApiUrl);
 }
 
 /**
  * 从html中提取yunData的json字符串内容
  */
-void pregYunDataJson(char * html, char * jsonStr) {
+void pregYunDataJson(char * url, char * jsonStr) {
+	struct curl_slist *headers = NULL;
+	char * html = curlHtml(url, headers);
 	regex_t reg;
 	char *pattern = "yunData.setData\\(([^;]+)\\);";
 	int nm = 10;

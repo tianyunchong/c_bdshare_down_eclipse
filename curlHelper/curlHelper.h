@@ -3,4 +3,5 @@
 #include "curl/curl.h"
 char *curlHtml(char *url, struct curl_slist *headers);
 size_t callback_gethtml(void *ptr, size_t size, size_t nmemb, void *userp);
+void curlPost(char * url, char * postFields, char * getHtml, struct curl_slist *headers);
 #endif
